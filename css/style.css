@@ -13,8 +13,7 @@ body {
 }
 
 main {
-  max-width: 1020px;
-  min-width: 500px;
+  min-width: 1020px;
   margin: auto;
   padding: 10px;
 }

@@ -181,15 +181,60 @@ export default class Keyboard {
   }
 
   resetPressedButtons = (targetCode) => {
-
+    if (!this.keysPressed[targetCode]) return;
+    if (!this.isCaps) this.keysPressed[targetCode].div.classList.remove('active');
+    this.keysPressed[targetCode].div.removeEventListener('mouseleave', this.resetButtonState);
+    delete this.keysPressed[targetCode];
   };
 
   resetButtonState = ({ target: { dataset: { code } } }) => {
-
+    if (code.match('Shift')) {
+      this.shiftKey = false;
+      this.switchUpperCase(false);
+      this.keysPressed[code].div.classList.remove('active');
+    }
+    if (code.match(/Control/)) this.ctrKey = false;
+    if (code.match(/Alt/)) this.altKey = false;
+    this.resetPressedButtons(code);
+    this.output.focus();
   };
 
   switchUpperCase (isTrue) {
-
+    if (isTrue) {
+      this.keyButtons.forEach((button) => {
+        if (button.sub) {
+          if (this.shiftKey) {
+            button.sub.classList.add('sub-active');
+            button.letter.classList.add('sub-inactive');
+          }
+        }
+        if (!button.isFnKey && this.isCaps && !this.shiftKey && !button.sub.innerHTML) {
+          button.letter.innerHTML = button.shift;
+        } else if (!button.isFnKey && this.isCaps && this.shiftKey) {
+          button.letter.innerHTML = button.small;
+        } else if (!button.isFnKey && !button.sub.innerHTML) {
+          button.letter.innerHTML = button.shift;
+        }
+      });
+    } else {
+      this.keyButtons.forEach((button) => {
+        if (button.sub.innerHTML && !button.isFnKey) {
+          button.sub.classList.remove('sub-active');
+          button.letter.classList.remove('sub-inactive');
+          if (!this.isCaps) {
+            button.letter.innerHTML = button.small;
+          } else if (!this.isCaps) {
+            button.letter.innerHTML = button.shift;
+          }
+        } else if (!button.isFnKey) {
+          if (this.isCaps) {
+            button.letter.innerHTML = button.shift;
+          } else {
+            button.letter.innerHTML = button.small;
+          }
+        }
+      });
+    }
   }
 
   switchLanguage = () => {
