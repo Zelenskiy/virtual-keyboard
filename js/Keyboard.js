@@ -87,7 +87,6 @@ export default class Keyboard {
     if (!keyObj) return;
     this.output.focus();
 
-    // push button
     if (type.match(/keydown|mousedown/)) {
       if (!type.match(/mouse/)) e.preventDefault();
       if (code.match(/Shift/)) this.shiftKey = true;
@@ -109,7 +108,6 @@ export default class Keyboard {
         this.switchUpperCase(false);
         keyObj.div.classList.remove('active');
       }
-
       if (this.lanKey) {
         this.lanKey = false;
       } else if (!this.isCaps) {
@@ -121,10 +119,7 @@ export default class Keyboard {
           this.printToOutput(keyObj, !keyObj.sub.innerHTML ? keyObj.shift : keyObj.small);
         }
       }
-
       this.keysPressed[keyObj.code] = keyObj;
-
-    // key up
     } else if (e.type.match(/keyup|mouseup/)) {
       this.resetPressedButtons(code);
       if (code.match(/Shift/)) {
