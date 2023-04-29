@@ -28,3 +28,77 @@ function hideShowKeyboard () {
     keyBrd.style.opacity = 1;
   }
 }
+export default class Keyboard {
+  constructor (rowsOrder) {
+    this.rowsOrder = rowsOrder;
+    this.keysPressed = {};
+    this.isCaps = false;
+  }
+
+  init (langCode) {
+    lang = langCode;
+    this.keyBase = language[langCode];
+    this.output = create('textarea', 'output', null, main,
+      ['placeholder', 'Start typing...'],
+      ['rows', 5],
+      ['cols', 50]
+    );
+    this.container = create('div', 'keyboard', null, main, ['language', langCode]);
+    document.body.prepend(main);
+    return this;
+  }
+
+  generateLayout () {
+    this.keyButtons = [];
+    this.rowsOrder.forEach((row, i) => {
+      const rowElement = create('div', 'keyboard__row', null, this.container, ['row', i + 1]);
+      rowElement.style.gridTemplateColumns = `repeat(${row.length}, 1fr)`;
+      row.forEach((code) => {
+        const keyObj = this.keyBase.find((key) => key.code === code);
+        if (keyObj) {
+          const keyButton = new Key(keyObj);
+          this.keyButtons.push(keyButton);
+          rowElement.appendChild(keyButton.div);
+        }
+      });
+    });
+
+    document.addEventListener('keydown', this.handleEvent);
+    document.addEventListener('keyup', this.handleEvent);
+    this.container.onmousedown = this.preHandleEvent;
+    this.container.onmouseup = this.preHandleEvent;
+  }
+
+  preHandleEvent = (e) => {
+    e.stopPropagation();
+    const keyDiv = e.target.closest('.keyboard__key');
+    if (!keyDiv) return;
+    const { dataset: { code } } = keyDiv;
+    keyDiv.addEventListener('mouseleave', this.resetButtonState);
+    this.handleEvent({ code, type: e.type });
+  };
+
+  handleEvent = (e) => {
+
+  };
+
+  printToOutput (keyObj, symbol) {
+
+  }
+
+  resetPressedButtons = (targetCode) => {
+
+  };
+
+  resetButtonState = ({ target: { dataset: { code } } }) => {
+
+  };
+
+  switchUpperCase (isTrue) {
+
+  }
+
+  switchLanguage = () => {
+
+  };
+}
