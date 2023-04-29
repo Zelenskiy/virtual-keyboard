@@ -36,7 +36,6 @@ export default class Keyboard {
   }
 
   init (langCode) {
-    lang = langCode;
     this.keyBase = language[langCode];
     this.output = create('textarea', 'output', null, main,
       ['placeholder', 'Start typing...'],
@@ -83,7 +82,44 @@ export default class Keyboard {
   };
 
   printToOutput (keyObj, symbol) {
-
+    let cursorPos = this.output.selectionStart;
+    const left = this.output.value.slice(0, cursorPos);
+    const right = this.output.value.slice(cursorPos);
+    const textHandlers = {
+      Tab: () => {
+        this.output.value = `${left}\t${right}`;
+        cursorPos += 1;
+      },
+      ArrowLeft: () => {
+        cursorPos = cursorPos - 1 >= 0 ? cursorPos - 1 : 0;
+      },
+      ArrowRight: () => {
+        cursorPos += 1;
+      },
+      ArrowUp: () => {
+        const positionFromLeft = this.output.value.slice(0, cursorPos).match(/(\n).*$(?!\1)/g) || [[1]];
+        cursorPos -= positionFromLeft[0].length;
+      },
+      ArrowDown: () => {
+        const positionFromLeft = this.output.value.slice(cursorPos).match(/^.*(\n).*(?!\1)/) || [[1]];
+        cursorPos += positionFromLeft[0].length;
+      },
+      Enter: () => {
+        this.output.value = `${left}\n${right}`;
+        cursorPos += 1;
+      },
+      Del: () => {
+        this.output.value = `${left}${right.slice(1)}`;
+      },
+      Backspace: () => {
+        this.output.value = `${left.slice(0, -1)}${right}`;
+        cursorPos -= 1;
+      },
+      Space: () => {
+        this.output.value = `${left} ${right}`;
+        cursorPos += 1;
+      }
+    };
   }
 
   resetPressedButtons = (targetCode) => {
