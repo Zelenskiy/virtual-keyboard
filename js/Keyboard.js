@@ -16,9 +16,10 @@ const main = create('main', '',
   ]);
 
 // eslint-disable-next-line no-unused-vars
-const lang = 'en';
+let lang = 'en';
 
 btn.addEventListener('click', hideShowKeyboard);
+
 function hideShowKeyboard () {
   btnIsHide = !btnIsHide;
   const keyBrd = document.querySelector('.keyboard');
@@ -28,6 +29,7 @@ function hideShowKeyboard () {
     keyBrd.style.opacity = 1;
   }
 }
+
 export default class Keyboard {
   constructor (rowsOrder) {
     this.rowsOrder = rowsOrder;
@@ -36,6 +38,7 @@ export default class Keyboard {
   }
 
   init (langCode) {
+    lang = langCode;
     this.keyBase = language[langCode];
     this.output = create('textarea', 'output', null, main,
       ['placeholder', 'Start typing...'],
@@ -78,7 +81,61 @@ export default class Keyboard {
   };
 
   handleEvent = (e) => {
+    if (e.stopPropagation) e.stopPropagation();
+    const { code, type } = e;
+    const keyObj = this.keyButtons.find((key) => key.code === code);
+    if (!keyObj) return;
+    this.output.focus();
 
+    // push button
+    if (type.match(/keydown|mousedown/)) {
+      if (!type.match(/mouse/)) e.preventDefault();
+      if (code.match(/Shift/)) this.shiftKey = true;
+      if (this.shiftKey) this.switchUpperCase(true);
+      if (code.match(/Control|Alt|Caps/) && e.repeat) return;
+      if (code.match(/Control/)) this.ctrKey = true;
+      if (code.match(/Alt/)) this.altKey = true;
+      if (code.match(/Control/) && this.altKey) this.switchLanguage();
+      if (code.match(/Alt/) && this.ctrKey) this.switchLanguage();
+
+      if (code.match(/Control/) && code.match(/Alt/)) this.switchLanguage();
+
+      keyObj.div.classList.add('active');
+      if (code.match(/Caps/) && !this.isCaps) {
+        this.isCaps = true;
+        this.switchUpperCase(true);
+      } else if (code.match(/Caps/) && this.isCaps) {
+        this.isCaps = false;
+        this.switchUpperCase(false);
+        keyObj.div.classList.remove('active');
+      }
+
+      if (this.lanKey) {
+        this.lanKey = false;
+      } else if (!this.isCaps) {
+        this.printToOutput(keyObj, this.shiftKey ? keyObj.shift : keyObj.small);
+      } else if (this.isCaps) {
+        if (this.shiftKey) {
+          this.printToOutput(keyObj, keyObj.sub.innerHTML ? keyObj.shift : keyObj.small);
+        } else {
+          this.printToOutput(keyObj, !keyObj.sub.innerHTML ? keyObj.shift : keyObj.small);
+        }
+      }
+
+      this.keysPressed[keyObj.code] = keyObj;
+
+    // key up
+    } else if (e.type.match(/keyup|mouseup/)) {
+      this.resetPressedButtons(code);
+      if (code.match(/Shift/)) {
+        this.shiftKey = false;
+        this.switchUpperCase(false);
+      }
+      if (code.match(/Control/)) this.ctrKey = false;
+      if (code.match(/Alt/)) this.altKey = false;
+
+      if (!code.match(/Caps/)) keyObj.div.classList.remove('active');
+    }
   };
 
   printToOutput (keyObj, symbol) {
@@ -120,6 +177,12 @@ export default class Keyboard {
         cursorPos += 1;
       }
     };
+    if (textHandlers[keyObj.code]) textHandlers[keyObj.code]();
+    else if (!keyObj.isFnKey) {
+      cursorPos += 1;
+      this.output.value = `${left}${symbol || ''}${right}`;
+    }
+    this.output.setSelectionRange(cursorPos, cursorPos);
   }
 
   resetPressedButtons = (targetCode) => {
