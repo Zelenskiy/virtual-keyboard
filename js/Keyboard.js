@@ -193,6 +193,29 @@ export default class Keyboard {
   }
 
   switchLanguage = () => {
+    const langAbbr = Object.keys(language);
 
+    let langIdx = langAbbr.indexOf(this.container.dataset.language);
+    if (langIdx === 0) { lang = 'en'; } else { lang = 'ru'; }
+    this.keyBase = langIdx + 1 < langAbbr.length
+      ? language[langAbbr[langIdx += 1]]
+      : language[langAbbr[langIdx -= langIdx]];
+
+    this.container.dataset.language = langAbbr[langIdx];
+    storage.set('kbLang', langAbbr[langIdx]);
+
+    this.keyButtons.forEach((button) => {
+      const keyObj = this.keyBase.find((key) => key.code === button.code);
+      if (!keyObj) return;
+      button.shift = keyObj.shift;
+      button.small = keyObj.small;
+      if (keyObj.shift && keyObj.shift.match(/[^a-zA-Zа-яА-ЯёЁ0-9]/g)) {
+        button.sub.innerHTML = keyObj.shift;
+      } else {
+        button.sub.innerHTML = '';
+      }
+      button.letter.innerHTML = keyObj.small;
+    });
+    if (this.isCaps) this.switchUpperCase(true);
   };
 }
