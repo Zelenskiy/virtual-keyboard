@@ -10,6 +10,7 @@ const main = create('main', '',
   [create('h1', 'title', 'RSS virtual keyboard'),
     create('h3', 'subtitle', ''),
     create('p', 'hint', 'Use left <kbd>Ctrl</kbd> + <kbd>Alt</kbd> to switch language'),
+    create('p', 'hint', 'Клавиатура создана в операционной системе Windows'),
     create('div', 'div_btn_collapse',
       btn = create('button', 'btn_collapse', 'Hide/Show')
     )
